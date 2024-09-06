@@ -84,4 +84,24 @@ router.get('/profile', auth_middleware_1.default, (req, res) => __awaiter(void 0
         res.status(500).json({ message: 'Server error' });
     }
 }));
+router.put('/profile', auth_middleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { username, email } = req.body;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id; // Use optional chaining
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+    try {
+        // Update the user
+        const user = yield user_model_1.default.findByIdAndUpdate(userId, { username, email }, { new: true });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json({ message: 'Profile updated successfully', user });
+    }
+    catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}));
 exports.default = router;

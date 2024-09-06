@@ -83,4 +83,29 @@ router.get('/profile', authMiddleware, async (req: Request, res: Response) => {
     }
 });
 
+router.put('/profile', authMiddleware, async (req: Request, res: Response) => {
+    const { username, email } = req.body;
+    const userId = req.user?.id; // Use optional chaining
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    try {
+        // Update the user
+        const user = await User.findByIdAndUpdate(userId, { username, email }, { new: true });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'Profile updated successfully', user });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'Server error', error: (error as Error).message });
+    }
+});
+
+
+
 export default router;
