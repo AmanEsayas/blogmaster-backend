@@ -27,8 +27,8 @@ const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        // Attach the user ID to the request object for later use
-        req.user = { id: user._id.toString() };
+        // Attach the user ID and role to the request object for later use
+        req.user = { id: user._id.toString(), role: user.role };
         next();
     }
     catch (error) {

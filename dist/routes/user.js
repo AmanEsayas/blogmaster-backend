@@ -18,9 +18,19 @@ const user_model_1 = __importDefault(require("../models/user.model"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth_middleware_1 = __importDefault(require("../middleware/auth.middleware"));
+const express_validator_1 = require("express-validator");
 const router = (0, express_1.Router)();
 // Registration route
-router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/register', [
+    // Validation rules
+    (0, express_validator_1.body)('username').notEmpty().withMessage('Username is required'),
+    (0, express_validator_1.body)('email').isEmail().withMessage('Invalid email format'),
+    (0, express_validator_1.body)('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { username, email, password } = req.body;
     try {
         if (!username || !email || !password) {
@@ -41,7 +51,15 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 }));
 // Login route
-router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/login', [
+    // Validation rules
+    (0, express_validator_1.body)('email').isEmail().withMessage('Invalid email format'),
+    (0, express_validator_1.body)('password').notEmpty().withMessage('Password is required'),
+], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { email, password } = req.body;
     try {
         if (!email || !password) {
@@ -68,7 +86,6 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 // Protected route to get user profile
 router.get('/profile', auth_middleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    // Typecast the request as AuthRequest to access the `user` property
     const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
     if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -84,10 +101,19 @@ router.get('/profile', auth_middleware_1.default, (req, res) => __awaiter(void 0
         res.status(500).json({ message: 'Server error' });
     }
 }));
-router.put('/profile', auth_middleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Profile update route
+router.put('/profile', [
+    // Validation rules
+    (0, express_validator_1.body)('username').optional().notEmpty().withMessage('Username cannot be empty'),
+    (0, express_validator_1.body)('email').optional().isEmail().withMessage('Invalid email format'),
+], auth_middleware_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const errors = (0, express_validator_1.validationResult)(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     const { username, email } = req.body;
-    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id; // Use optional chaining
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
     if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
