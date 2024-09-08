@@ -1,8 +1,10 @@
+// server.ts
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './routes/user';
+import postRoutes from './routes/post'; // Import post routes
 
 // Load environment variables from .env file
 dotenv.config();
@@ -21,6 +23,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // Use user routes
 app.use('/api/users', userRoutes);
+
+// Use post routes
+app.use('/api/posts', postRoutes); // Register post routes
 
 // Connect to MongoDB
 mongoose

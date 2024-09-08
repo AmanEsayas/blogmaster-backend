@@ -5,10 +5,10 @@ import User, { IUser } from '../models/user.model';
 import { Document } from 'mongoose';
 
 // Extend the request interface to include user id and role
-interface AuthRequest extends Request {
+export interface AuthRequest extends Request {
     user?: {
         id: string;
-        role: string; // Add role here
+        role: string;
     };
 }
 
@@ -22,13 +22,11 @@ const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunctio
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
 
-        // Fetch the user from the database using the decoded ID from the token
         const user = await User.findById(decoded.id) as (Document<unknown, {}, IUser> & IUser & { _id: string, role: string });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Attach the user ID and role to the request object for later use
         req.user = { id: user._id.toString(), role: user.role };
         next();
     } catch (error) {
